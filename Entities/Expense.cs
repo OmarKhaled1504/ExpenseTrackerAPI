@@ -7,7 +7,7 @@ public class Expense
     public int Id { set; get; }
     public string Name { set; get; } = string.Empty;
     public string Description { set; get; } = string.Empty;
-
+    public decimal Amount { set; get; }
     public DateTime CreatedAt { set; get; }
     public DateTime UpdatedAt { set; get; }
 
