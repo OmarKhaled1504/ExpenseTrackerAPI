@@ -1,6 +1,3 @@
 namespace ExpenseTrackerAPI.Dtos.CategoriesDtos;
 
-public record class CategoryUpdateDto
-{
-
-}
+public record class CategoryUpdateDto(string Name);

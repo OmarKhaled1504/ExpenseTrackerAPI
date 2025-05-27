@@ -9,7 +9,7 @@ public class Expense
     public string Description { set; get; } = string.Empty;
     public decimal Amount { set; get; }
     public DateTime CreatedAt { set; get; }
-    public DateTime UpdatedAt { set; get; }
+    public DateTime? UpdatedAt { set; get; }
 
     public  required Category Category { set; get; }
     public int CatId { set; get ; }

@@ -1,0 +1,10 @@
+using System;
+using ExpenseTrackerAPI.Dtos.CategoriesDtos;
+
+namespace ExpenseTrackerAPI.Services;
+
+public interface ICategoryService
+{
+    public Task<IEnumerable<CategoryDto>> GetCategoriesAsync(int pageNumber, int pageSize);
+    public Task<int> GetTotalCategoriesCountAsync();
+}
