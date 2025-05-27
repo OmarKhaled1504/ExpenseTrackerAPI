@@ -22,7 +22,8 @@ public class CategoryRepository : ICategoryRepository
         return newCategory;
     }
     public async Task<bool> GetCategoryExistsByNameAsync(string name)
-    { var category = await _context.Categories.FirstOrDefaultAsync(cat => cat.Name == name);
+    {
+        var category = await _context.Categories.FirstOrDefaultAsync(cat => cat.Name == name);
         return category is null ? false : true;
     }
 
@@ -55,5 +56,10 @@ public class CategoryRepository : ICategoryRepository
         category.Name = name;
         await _context.SaveChangesAsync();
         return category;
+    }
+    public async Task DeleteCategoryAsync(Category category)
+    {
+        _context.Categories.Remove(category);
+        await _context.SaveChangesAsync();
     }
 }

@@ -64,13 +64,19 @@ public class CategoryService : ICategoryService
     {
         var existingCategory = await _categoryRepository.GetCategoryAsync(id);
         if (existingCategory is null)
-        {
             return null;
-        }
+
 
         var updated = await _categoryRepository.UpdateCategoryAsync(existingCategory, dto.Name);
         return updated.ToDto();
     }
 
-
+    public async Task<bool> DeleteCategoryAsync(int id)
+    {
+        var existingCategory = await _categoryRepository.GetCategoryAsync(id);
+        if (existingCategory is null)
+            return false;
+        await _categoryRepository.DeleteCategoryAsync(existingCategory);
+        return true;
+    }
 }

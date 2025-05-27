@@ -7,6 +7,7 @@ namespace ExpenseTrackerAPI.Repositories;
 public interface ICategoryRepository
 {
     public Task<Category> CreateCategoryAsync(Category newCategory);
+    public Task DeleteCategoryAsync(Category existingCategory);
     public Task<List<Category>> GetCategoriesAsync(int pageNumber, int pageSize);
     public Task<Category?> GetCategoryAsync(int id);
     public Task<bool> GetCategoryExistsByNameAsync(string name);

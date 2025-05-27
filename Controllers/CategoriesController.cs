@@ -74,7 +74,7 @@ namespace ExpenseTrackerAPI.Controllers
 
         //PUT /api/categories/1
         [Authorize(Roles = "Admin")]
-        [HttpPut]
+        [HttpPut("{id}")]
         [ProducesResponseType(typeof(CategoryDto), 200)]
         [ProducesResponseType(401)]
         [ProducesResponseType(403)]
@@ -83,6 +83,19 @@ namespace ExpenseTrackerAPI.Controllers
         {
             var updated = await _categoryService.UpdateCategoryAsync(id, dto);
             return updated is null ? NotFound() : Ok(updated);
+        }
+
+        //DELETE /api/categories/1
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("{id}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(403)]
+        [ProducesResponseType(404)]
+        public async Task<IActionResult> DeleteCategory(int id)
+        {
+            var response = await _categoryService.DeleteCategoryAsync(id);
+            return response ? NoContent() : NotFound();
         }
     }
 }
