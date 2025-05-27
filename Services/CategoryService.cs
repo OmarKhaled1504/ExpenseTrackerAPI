@@ -28,6 +28,18 @@ public class CategoryService : ICategoryService
 
     }
 
+    public async Task<CategoryDto?> GetCategoryAsync(int id)
+    {
+        var userId = _httpContextAccessor.HttpContext?.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+            throw new UnauthorizedAccessException("User not authenticated.");
+        var response = await _categoryRepository.GetCategoryAsync(id);
+        if (response is null)
+            return null;
+        var result = response.ToDto(response.Expenses.Where(exp => exp.UserId == userId));
+        return result;
+    }
+
     public async Task<int> GetTotalCategoriesCountAsync()
     {
         return await _categoryRepository.GetTotalCategoriesCountAsync();

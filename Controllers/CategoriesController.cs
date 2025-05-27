@@ -47,6 +47,18 @@ namespace ExpenseTrackerAPI.Controllers
             }
         }
 
+        //GET /api/categories/id
+        [Authorize]
+        [HttpGet("{id}")]
+        [ProducesResponseType(typeof(CategoryDto), 200)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(404)]
+        public async Task<ActionResult<CategoryDto?>> GetCategory(int id)
+        {
+            var category = await _categoryService.GetCategoryAsync(id);
+            return category is null ? NotFound() : Ok(category);
+        }
+
 
 
     }
