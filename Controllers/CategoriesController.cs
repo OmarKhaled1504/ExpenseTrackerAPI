@@ -59,6 +59,19 @@ namespace ExpenseTrackerAPI.Controllers
             return category is null ? NotFound() : Ok(category);
         }
 
+        //POST /api/categories/
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [ProducesResponseType(typeof(CategoryDto), 201)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(403)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult<CategoryDto>> PostCategory(CategoryCreateDto dto)
+        {
+            var created = await _categoryService.CreateCategoryAsync(dto);
+            return created is null ? BadRequest("Category already exists.") : CreatedAtAction(nameof(GetCategory), new { id = created.Id }, created);
+        }
+
 
 
     }

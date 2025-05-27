@@ -1,5 +1,6 @@
 using System;
 using ExpenseTrackerAPI.Dtos.CategoriesDtos;
+using ExpenseTrackerAPI.Entities;
 using ExpenseTrackerAPI.Mapping;
 using ExpenseTrackerAPI.Repositories;
 
@@ -15,6 +16,20 @@ public class CategoryService : ICategoryService
         _categoryRepository = categoryRepository;
         _httpContextAccessor = httpContextAccessor;
     }
+
+    public async Task<CategoryDto?> CreateCategoryAsync(CategoryCreateDto dto)
+    {
+        var newCategory = dto.ToEntity();
+        bool existingCategory = await _categoryRepository.GetCategoryExistsByNameAsync(newCategory.Name);
+        if (existingCategory)
+        {
+            return null;
+        }
+        var created = await _categoryRepository.CreateCategoryAsync(newCategory);
+        return created.ToDto();
+
+    }
+
     public async Task<IEnumerable<CategoryDto>> GetCategoriesAsync(int pageNumber, int pageSize)
     {
         var userId = _httpContextAccessor.HttpContext?.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
@@ -44,4 +59,6 @@ public class CategoryService : ICategoryService
     {
         return await _categoryRepository.GetTotalCategoriesCountAsync();
     }
+
+
 }

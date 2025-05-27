@@ -1,5 +1,6 @@
 using System;
 using ExpenseTrackerAPI.Data;
+using ExpenseTrackerAPI.Dtos.CategoriesDtos;
 using ExpenseTrackerAPI.Entities;
 using ExpenseTrackerAPI.Mapping;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,17 @@ public class CategoryRepository : ICategoryRepository
     public CategoryRepository(ExpenseContext context)
     {
         _context = context;
+    }
+
+    public async Task<Category> CreateCategoryAsync(Category newCategory)
+    {
+        await _context.Categories.AddAsync(newCategory);
+        await _context.SaveChangesAsync();
+        return newCategory;
+    }
+    public async Task<bool> GetCategoryExistsByNameAsync(string name)
+    { var category = await _context.Categories.FirstOrDefaultAsync(cat => cat.Name == name);
+        return category is null ? false : true;
     }
     public async Task<List<Category>> GetCategoriesAsync(int pageNumber, int pageSize)
     {
@@ -31,8 +43,11 @@ public class CategoryRepository : ICategoryRepository
         return await _context.Categories.Include(category => category.Expenses).FirstOrDefaultAsync(category => category.Id == id);
     }
 
+
     public async Task<int> GetTotalCategoriesCountAsync()
     {
         return await _context.Categories.CountAsync();
     }
+
+
 }
