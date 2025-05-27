@@ -13,7 +13,6 @@ A secure and scalable RESTful API built with ASP.NET Core and Entity Framework C
 - 🧼 DTO-based request/response models
 - 📊 Role-based authorization for secure access control
 - 🧠 Clean separation of concerns using service and repository patterns
-- 📄 Centralized error handling with custom middleware
 - 🐬 MySQL database integration via Pomelo provider
 
 ---
