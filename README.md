@@ -133,4 +133,4 @@ Licensed under the [MIT License](LICENSE).
 
 ## 📫 Contact
 
-Created by [Omar Khaled](https://github.com/OmarKhaled1504)Inspired by [roadmap.sh](https://roadmap.sh/projects/expense-tracker-api)
+Created by [Omar Khaled](https://github.com/OmarKhaled1504)**Inspired by [roadmap.sh](https://roadmap.sh/projects/expense-tracker-api).**
