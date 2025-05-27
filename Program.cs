@@ -21,9 +21,12 @@ builder.Services.AddDbContext<ExpenseContext>(options => options.UseMySql(
 builder.Services.AddIdentity<User, IdentityRole>()
 .AddEntityFrameworkStores<ExpenseContext>()
 .AddDefaultTokenProviders();
+builder.Services.AddAuthorization();
+builder.Services.AddControllers();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ITokenService, TokenService>();
 
 
 var app = builder.Build();
@@ -34,7 +37,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
 app.UseHttpsRedirection();
 
 
