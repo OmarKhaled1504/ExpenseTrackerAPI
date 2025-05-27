@@ -22,7 +22,7 @@ public class UserRepository : IUserRepository
         var existingUser = await _userManager.FindByNameAsync(user.UserName);
         if (existingUser != null)
         {
-            return (null, new [] {"Username already exists."});
+            return (null, new[] { "Username already exists." });
         }
         var result = await _userManager.CreateAsync(user, password);
         if (!result.Succeeded)
@@ -31,5 +31,13 @@ public class UserRepository : IUserRepository
         }
         return (user, null);
     }
+    public async Task<User?> GetUserByUserNameAsync(string username)
+{
+    return await _userManager.FindByNameAsync(username);
+}
 
+    public async Task<bool> CheckPasswordAsync(User user, string password)
+    {
+        return await _userManager.CheckPasswordAsync(user, password);
+    }
 }

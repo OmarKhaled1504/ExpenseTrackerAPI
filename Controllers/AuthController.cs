@@ -24,4 +24,14 @@ public class AuthController : ControllerBase
         return token is null ? BadRequest(errors) : Ok(token);
     }
 
+    [HttpPost]
+    [Route("login")]
+    [ProducesResponseType(typeof(TokenDto), 200)]
+    [ProducesResponseType(401)]
+    public async Task<ActionResult<TokenDto?>> Login(LoginDto dto)
+    {
+        var (token, errors) = await _authService.LoginAsync(dto);
+        return token is null ? Unauthorized(errors) : Ok(token);
+    }
+
 }
