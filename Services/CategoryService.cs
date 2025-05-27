@@ -60,5 +60,17 @@ public class CategoryService : ICategoryService
         return await _categoryRepository.GetTotalCategoriesCountAsync();
     }
 
+    public async Task<CategoryDto?> UpdateCategoryAsync(int id, CategoryUpdateDto dto)
+    {
+        var existingCategory = await _categoryRepository.GetCategoryAsync(id);
+        if (existingCategory is null)
+        {
+            return null;
+        }
+
+        var updated = await _categoryRepository.UpdateCategoryAsync(existingCategory, dto.Name);
+        return updated.ToDto();
+    }
+
 
 }

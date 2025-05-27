@@ -25,6 +25,7 @@ public class CategoryRepository : ICategoryRepository
     { var category = await _context.Categories.FirstOrDefaultAsync(cat => cat.Name == name);
         return category is null ? false : true;
     }
+
     public async Task<List<Category>> GetCategoriesAsync(int pageNumber, int pageSize)
     {
         if (pageSize > 100)
@@ -49,5 +50,10 @@ public class CategoryRepository : ICategoryRepository
         return await _context.Categories.CountAsync();
     }
 
-
+    public async Task<Category> UpdateCategoryAsync(Category category, string name)
+    {
+        category.Name = name;
+        await _context.SaveChangesAsync();
+        return category;
+    }
 }

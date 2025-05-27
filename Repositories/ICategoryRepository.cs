@@ -11,4 +11,5 @@ public interface ICategoryRepository
     public Task<Category?> GetCategoryAsync(int id);
     public Task<bool> GetCategoryExistsByNameAsync(string name);
     public Task<int> GetTotalCategoriesCountAsync();
+    public Task<Category> UpdateCategoryAsync(Category existingCategory, string name);
 }
