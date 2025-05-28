@@ -1,5 +1,6 @@
 using System;
 using ExpenseTrackerAPI.Data;
+using ExpenseTrackerAPI.Dtos.ExpensesDtos;
 using ExpenseTrackerAPI.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,6 +12,17 @@ public class ExpenseRepository : IExpenseRepository
     public ExpenseRepository(ExpenseContext context)
     {
         _context = context;
+    }
+
+    public async Task CreateExpenseAsync(Expense expense)
+    {
+        await _context.Expenses.AddAsync(expense);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<Expense?> GetExpenseAsync(int id)
+    {
+        return await _context.Expenses.Include(exp =>exp.Category).SingleOrDefaultAsync(exp =>exp.Id == id);
     }
 
     public async Task ReassignCategoryAsync(int from, int to)

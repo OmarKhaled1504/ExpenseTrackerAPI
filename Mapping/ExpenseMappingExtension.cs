@@ -9,12 +9,24 @@ public static class ExpenseMappingExtension
     public static ExpenseDto ToDto(this Expense expense)
     {
         return new ExpenseDto(
+            expense.Id,
             expense.Name,
             expense.Description,
-            expense.Category.Name,
+            expense.Category!.Name,
             expense.Amount,
             expense.CreatedAt,
             expense.UpdatedAt
         );
+    }
+
+    public static Expense ToEntity(this ExpenseCreateDto dto)
+    {
+        return new Expense
+        {
+            Name = dto.Name,
+            Description = dto.Description,
+            Amount = dto.Amount,
+            CatId = dto.CategoryId
+        };
     }
 }
