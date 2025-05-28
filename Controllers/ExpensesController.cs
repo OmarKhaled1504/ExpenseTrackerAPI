@@ -49,5 +49,24 @@ namespace ExpenseTrackerAPI.Controllers
             return createdDto is null ? BadRequest($"Category with ID {dto.CategoryId} does not exist") : CreatedAtAction(nameof(GetExpense), new { id = createdDto.Id }, createdDto);
         }
 
+        //DELETE /api/expenses/1
+        [Authorize]
+        [HttpDelete("{id}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(403)]
+        public async Task<IActionResult> DeleteExpense(int id)
+        {
+            try
+            {
+                var deleted = await _expenseService.DeleteExpenseAsync(id);
+                return deleted ? NoContent() : NotFound();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
+        }
     }
 }

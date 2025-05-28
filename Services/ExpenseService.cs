@@ -1,5 +1,6 @@
 using System;
 using ExpenseTrackerAPI.Dtos.ExpensesDtos;
+using ExpenseTrackerAPI.Entities;
 using ExpenseTrackerAPI.Mapping;
 using ExpenseTrackerAPI.Repositories;
 
@@ -34,6 +35,27 @@ public class ExpenseService : IExpenseService
         return expense.ToDto();
     }
 
+    public async Task<bool> DeleteExpenseAsync(int id)
+    {
+        var expense = await _expenseRepository.GetExpenseAsync(id);
+        if (expense is null)
+        {
+            return false;
+        }
+        if (!CheckOwnership(expense))
+        {
+            throw new UnauthorizedAccessException("Forbidden.");
+        }
+        await _expenseRepository.DeleteExpenseAsync(expense);
+        return true;
+    }
+
+    private bool CheckOwnership(Expense expense)
+    {
+        var userId = _httpContextAccessor.HttpContext?.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        return expense.UserId == userId;
+    }
+
     public async Task<ExpenseDto?> GetExpenseAsync(int id)
     {
         var expense = await _expenseRepository.GetExpenseAsync(id);
@@ -41,9 +63,11 @@ public class ExpenseService : IExpenseService
         {
             return null;
         }
-        var userId = _httpContextAccessor.HttpContext?.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-        if (expense.UserId != userId)
+        if (!CheckOwnership(expense))
+        {
             throw new UnauthorizedAccessException("Forbidden.");
+        }
         return expense.ToDto();
     }
+
 }
