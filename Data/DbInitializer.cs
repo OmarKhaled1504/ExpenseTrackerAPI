@@ -1,6 +1,7 @@
 using System;
 using ExpenseTrackerAPI.Entities;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace ExpenseTrackerAPI.Data;
 
@@ -38,11 +39,27 @@ public static class DbInitializer
             {
                 await userManager.AddToRoleAsync(user, "Admin");
             }
-        }else
-            {
-                // Ensure the user is in the Admin role
-                if (!await userManager.IsInRoleAsync(user, "Admin"))
-                    await userManager.AddToRoleAsync(user, "Admin");
-            }
+        }
+        else
+        {
+            // Ensure the user is in the Admin role
+            if (!await userManager.IsInRoleAsync(user, "Admin"))
+                await userManager.AddToRoleAsync(user, "Admin");
+        }
+    }
+
+    public static async Task SeedUnspecifiedCategoryAsync(ExpenseContext context)
+    {
+        // Make sure the DB is created (should be already)
+        await context.Database.EnsureCreatedAsync();
+
+        // Look for the "Unspecified" category
+        var existing = await context.Categories.FirstOrDefaultAsync(c => c.Name == "Unspecified");
+        if (existing == null)
+        {
+            var category = new Category { Name = "Unspecified" };
+            context.Categories.Add(category);
+            await context.SaveChangesAsync();
+        }
     }
 }

@@ -85,6 +85,9 @@ using (var scope = app.Services.CreateScope())
 
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
     await DbInitializer.SeedAdminUserAsync(userManager);
+
+    var context = scope.ServiceProvider.GetRequiredService<ExpenseContext>();
+    await DbInitializer.SeedUnspecifiedCategoryAsync(context);
 }
 
 if (app.Environment.IsDevelopment())
