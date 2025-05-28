@@ -10,4 +10,5 @@ public interface IExpenseRepository
     public Task DeleteExpenseAsync(Expense expense);
     public Task<Expense?> GetExpenseAsync(int id);
     public Task ReassignCategoryAsync(int from, int to);
+    public Task UpdateExpenseAsync(Expense expense);
 }

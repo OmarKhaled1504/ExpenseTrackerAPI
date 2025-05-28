@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using ExpenseTrackerAPI.Dtos.ExpensesDtos;
 using ExpenseTrackerAPI.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -62,6 +63,31 @@ namespace ExpenseTrackerAPI.Controllers
             {
                 var deleted = await _expenseService.DeleteExpenseAsync(id);
                 return deleted ? NoContent() : NotFound();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
+        }
+
+        //PUT /api/expense/1
+        [Authorize]
+        [HttpPut("{id}")]
+        [ProducesResponseType(typeof(ExpenseDto), 200)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(403)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult<ExpenseDto>> UpdateExpense(int id, ExpenseUpdateDto dto)
+        {
+            try
+            {
+                var updatedDto = await _expenseService.UpdateExpenseAsync(id, dto);
+                return updatedDto is null ? NotFound() : Ok(updatedDto);
+            }
+            catch (Exception ex) when (ex.Message == "Category")
+            {
+                return BadRequest($"Category with ID {dto.CategoryId} does not exist");
             }
             catch (UnauthorizedAccessException)
             {

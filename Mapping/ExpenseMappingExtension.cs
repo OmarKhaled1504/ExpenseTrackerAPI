@@ -29,4 +29,11 @@ public static class ExpenseMappingExtension
             CatId = dto.CategoryId
         };
     }
+    public static void Update(this Expense expense, ExpenseUpdateDto dto)
+    {
+        expense.Name = dto.Name;
+        expense.Description = dto.Description;
+        expense.Amount = dto.Amount;
+        expense.CatId = dto.CategoryId;
+    }
 }

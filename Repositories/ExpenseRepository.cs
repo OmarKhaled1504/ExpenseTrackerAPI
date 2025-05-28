@@ -43,4 +43,9 @@ public class ExpenseRepository : IExpenseRepository
         }
         await _context.SaveChangesAsync();
     }
+
+    public async Task UpdateExpenseAsync(Expense expense)
+    {
+        await _context.SaveChangesAsync();
+    }
 }

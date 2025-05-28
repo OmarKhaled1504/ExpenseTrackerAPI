@@ -70,4 +70,20 @@ public class ExpenseService : IExpenseService
         return expense.ToDto();
     }
 
+    public async Task<ExpenseDto?> UpdateExpenseAsync(int id, ExpenseUpdateDto dto)
+    {   var existingCategory = await _categoryRepository.GetCategoryAsync(dto.CategoryId);
+        if (existingCategory is null)
+            throw new Exception("Category");
+        var expense = await _expenseRepository.GetExpenseAsync(id);
+        if (expense is null)
+        {
+            return null;
+        }
+        if (!CheckOwnership(expense))
+            throw new UnauthorizedAccessException("Forbidden.");
+        expense.Update(dto);
+        expense.UpdatedAt = DateTime.UtcNow;
+        await _expenseRepository.UpdateExpenseAsync(expense);
+        return expense.ToDto();
+    }
 }
