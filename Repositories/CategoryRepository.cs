@@ -10,6 +10,7 @@ namespace ExpenseTrackerAPI.Repositories;
 public class CategoryRepository : ICategoryRepository
 {
     private readonly ExpenseContext _context;
+
     public CategoryRepository(ExpenseContext context)
     {
         _context = context;
@@ -21,10 +22,10 @@ public class CategoryRepository : ICategoryRepository
         await _context.SaveChangesAsync();
         return newCategory;
     }
-    public async Task<bool> GetCategoryExistsByNameAsync(string name)
+    public async Task<Category?> GetCategoryByNameAsync(string name)
     {
         var category = await _context.Categories.FirstOrDefaultAsync(cat => cat.Name == name);
-        return category is null ? false : true;
+        return category is null ? null : category;
     }
 
     public async Task<List<Category>> GetCategoriesAsync(int pageNumber, int pageSize)

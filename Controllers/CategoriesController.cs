@@ -94,8 +94,15 @@ namespace ExpenseTrackerAPI.Controllers
         [ProducesResponseType(404)]
         public async Task<IActionResult> DeleteCategory(int id)
         {
-            var response = await _categoryService.DeleteCategoryAsync(id);
-            return response ? NoContent() : NotFound();
+            try
+            {
+                var response = await _categoryService.DeleteCategoryAsync(id);
+                return response ? NoContent() : NotFound();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }
