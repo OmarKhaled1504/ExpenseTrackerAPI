@@ -1,6 +1,6 @@
 # 💸 ExpenseTrackerAPI
 
-A secure and scalable RESTful API built with ASP.NET Core and Entity Framework Core for managing personal expenses. Includes features for user authentication, role-based access (admin/user), and CRUD operations for categories and expenses.
+A secure and scalable RESTful API built with ASP.NET Core and Entity Framework Core for managing personal expenses. Includes robust user authentication, role-based access (admin/user), and advanced expense and category management with pagination and filtering.
 
 ---
 
@@ -8,9 +8,10 @@ A secure and scalable RESTful API built with ASP.NET Core and Entity Framework C
 
 - 🔐 JWT-based authentication with role support (Admin/User)
 - 👥 User registration and login
-- 💼 Admin-only management of expense categories
+- 💼 Admin-only management of expense categories (create, update, delete)
 - 🧾 CRUD operations for personal expenses
-- 🧼 DTO-based request/response models
+- 🔍 Filtering and pagination support for expense queries
+- 🧼 DTO-based request/response models for clean API contracts
 - 📊 Role-based authorization for secure access control
 - 🧠 Clean separation of concerns using service and repository patterns
 - 🐬 MySQL database integration via Pomelo provider
@@ -32,62 +33,45 @@ A secure and scalable RESTful API built with ASP.NET Core and Entity Framework C
 ```
 ExpenseTrackerAPI/
 ├── Controllers/           # API controllers for Auth, Categories, and Expenses
-├── Data/                  # EF DbContext and database initializer
-├── Dtos/                  # Data Transfer Objects for requests/responses
+├── Data/                  # EF DbContext and configurations
+├── Dtos/                  # Data Transfer Objects for Users, Categories, Expenses
+│   ├── CategoriesDtos/
+│   ├── ExpensesDtos/
+│   └── UsersDtos/
 ├── Entities/              # Domain models (User, Expense, Category)
-├── Mappings/              # Mapping extensions between entities and DTOs
-├── Middleware/            # Global exception handling middleware
-├── Repositories/          # Interfaces and implementations for data access
-├── Services/              # Business logic for Auth, Expense, and Category
-├── appsettings.json       # Main configuration file
-├── Program.cs             # Entry point and application setup
-└── ExpenseTrackerAPI.csproj # Project configuration file
+├── Mapping/               # AutoMapper profiles
+├── Migrations/            # EF Core migrations
+├── Repositories/          # Repository interfaces and implementations
+├── Responses/             # Standardized API response models
+├── Services/              # Business logic and services
+├── appsettings.json       # App configuration
+├── Program.cs             # Application entry point
+└── README.md              # Project documentation
 ```
 
 ---
 
-## ⚙️ Getting Started
+## 🧪 Getting Started
 
-### Prerequisites
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-username/ExpenseTrackerAPI.git
+   cd ExpenseTrackerAPI
+   ```
 
-- [.NET 8 SDK](https://dotnet.microsoft.com/download)
-- [MySQL Server](https://dev.mysql.com/downloads/mysql/)
-- Visual Studio or VS Code
+2. Configure the database connection string in `appsettings.json` or use user secrets.
 
-### Installation Steps
+3. Apply migrations and update the database:
+   ```bash
+   dotnet ef database update
+   ```
 
-1. **Clone the repository**
+4. Run the application:
+   ```bash
+   dotnet run
+   ```
 
-```bash
-git clone https://github.com/your-username/ExpenseTrackerAPI.git
-cd ExpenseTrackerAPI
-```
-
-2. **Set your database connection string**
-
-In `appsettings.json`:
-
-```json
-"ConnectionStrings": {{
-  "DefaultConnection": "server=localhost;port=3306;database=ExpenseDb;user=root;password=yourpassword;"
-}}
-```
-
-> 💡 For security, use [User Secrets](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets) or environment variables.
-
-3. **Apply EF Core migrations**
-
-```bash
-dotnet ef database update
-```
-
-4. **Run the application**
-
-```bash
-dotnet run
-```
-
-Visit `https://localhost:5001` or `http://localhost:5000`
+5. Explore the API using Swagger at `https://localhost:{port}/swagger`.
 
 ---
 
@@ -102,14 +86,14 @@ Visit `https://localhost:5001` or `http://localhost:5000`
 
 ### Categories (Admin Only)
 
-- `GET /api/categories` – Get all categories
+- `GET /api/categories` – Get all categories (with pagination)
 - `POST /api/categories` – Create a new category
 - `PUT /api/categories/{id}` – Update a category
 - `DELETE /api/categories/{id}` – Delete a category
 
 ### Expenses (Authenticated Users)
 
-- `GET /api/expenses` – List user expenses
+- `GET /api/expenses` – List user expenses (supports filtering by date or keyword + pagination)
 - `POST /api/expenses` – Add an expense
 - `PUT /api/expenses/{id}` – Update an expense
 - `DELETE /api/expenses/{id}` – Delete an expense
