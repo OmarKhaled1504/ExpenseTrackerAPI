@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using ExpenseTrackerAPI.Dtos.ExpensesDtos;
+using ExpenseTrackerAPI.Responses;
 using ExpenseTrackerAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -92,6 +93,32 @@ namespace ExpenseTrackerAPI.Controllers
             catch (UnauthorizedAccessException)
             {
                 return Forbid();
+            }
+        }
+
+        //Get /api/expenses?filtered
+        [Authorize]
+        [HttpGet]
+        [ProducesResponseType(typeof(PagedResponse<ExpenseDto>), 200)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(400)]
+
+        public async Task<ActionResult<PagedResponse<ExpenseDto>>> GetExpenses(
+            string? filter = null,
+            DateTime? startDate = null,
+            DateTime? endDate = null,
+            int pageNumber = 1,
+            int pageSize = 10
+        )
+        {
+            try
+            {
+                var expenses = await _expenseService.GetExpenseAsync(filter, startDate, endDate, pageNumber, pageSize);
+                return Ok(expenses);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
             }
         }
     }

@@ -28,7 +28,7 @@ public class ExpenseRepository : IExpenseRepository
 
     public async Task<Expense?> GetExpenseAsync(int id)
     {
-        return await _context.Expenses.Include(exp =>exp.Category).SingleOrDefaultAsync(exp =>exp.Id == id);
+        return await _context.Expenses.Include(exp => exp.Category).SingleOrDefaultAsync(exp => exp.Id == id);
     }
 
     public async Task ReassignCategoryAsync(int from, int to)
@@ -47,5 +47,20 @@ public class ExpenseRepository : IExpenseRepository
     public async Task UpdateExpenseAsync(Expense expense)
     {
         await _context.SaveChangesAsync();
+    }
+    public async Task<int> GetTotalExpensesCountByIdAndFilterAsync(string userId, DateTime fromDate, DateTime toDate)
+    {
+        return await _context.Expenses.CountAsync(exp => exp.UserId == userId && exp.CreatedAt >= fromDate && exp.CreatedAt <= toDate);
+    }
+
+    public async Task<IEnumerable<Expense>> GetExpensesAsync(string userId, DateTime fromDate, DateTime toDate, int pageNumber, int pageSize)
+    {
+        return await _context.Expenses
+        .Include(exp => exp.Category)
+        .Where(exp => exp.UserId == userId && exp.CreatedAt >= fromDate && exp.CreatedAt <= toDate)
+        .Skip((pageNumber - 1) * pageSize)
+        .Take(pageSize)
+        .OrderByDescending(exp => exp.CreatedAt)
+        .ToArrayAsync();
     }
 }

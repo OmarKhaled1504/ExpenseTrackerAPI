@@ -1,8 +1,10 @@
 using System;
+using System.Data;
 using ExpenseTrackerAPI.Dtos.ExpensesDtos;
 using ExpenseTrackerAPI.Entities;
 using ExpenseTrackerAPI.Mapping;
 using ExpenseTrackerAPI.Repositories;
+using ExpenseTrackerAPI.Responses;
 
 namespace ExpenseTrackerAPI.Services;
 
@@ -85,5 +87,53 @@ public class ExpenseService : IExpenseService
         expense.UpdatedAt = DateTime.UtcNow;
         await _expenseRepository.UpdateExpenseAsync(expense);
         return expense.ToDto();
+    }
+
+    public async Task<PagedResponse<ExpenseDto>> GetExpenseAsync(string? filter, DateTime? startDate, DateTime? endDate, int pageNumber, int pageSize)
+    {
+        var userId = _httpContextAccessor.HttpContext?.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        DateTime fromDate, toDate;
+        toDate = DateTime.UtcNow;
+
+        if (!string.IsNullOrWhiteSpace(filter))
+        {
+            filter = filter.ToLowerInvariant();
+            if (filter == "pastweek")
+            {
+                fromDate = toDate.AddDays(-7);
+            }
+            else if (filter == "pastmonth")
+            {
+                fromDate = toDate.AddMonths(-1);
+            }
+            else if (filter == "last3months")
+            {
+                fromDate = toDate.AddMonths(-3);
+            }
+            else if (filter == "custom")
+            {
+                if (startDate is null || endDate is null)
+                    throw new ArgumentException("Custom filter require startDate and endDate to not be null.");
+                fromDate = startDate.Value;
+                toDate = endDate.Value;
+            }
+            else
+                throw new ArgumentException("invalid filter value");
+
+        }
+        else
+        {
+            fromDate = DateTime.MinValue;
+        }
+
+        var expenses = await _expenseRepository.GetExpensesAsync(userId!, fromDate, toDate, pageNumber, pageSize);
+
+        return new PagedResponse<ExpenseDto>
+        {
+            Data = expenses.Select(exp => exp.ToDto()),
+            PageNumber = pageNumber,
+            PageSize = pageSize,
+            TotalCount = await _expenseRepository.GetTotalExpensesCountByIdAndFilterAsync(userId!,fromDate,toDate)
+        };
     }
 }
