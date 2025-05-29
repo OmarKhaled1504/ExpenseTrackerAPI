@@ -11,9 +11,10 @@ A secure and scalable RESTful API built with ASP.NET Core and Entity Framework C
 - 💼 Admin-only management of expense categories (create, update, delete)
 - 🧾 CRUD operations for personal expenses
 - 🔍 Filtering and pagination support for expense queries
-- 🧼 DTO-based request/response models for clean API contracts
+- 🧼 DTO-based request/response models with data annotations for automatic validation
+- 🧠 Clean separation of concerns using service, repository, and Unit of Work patterns
+- 🔁 Unit of Work to manage transactional integrity across multiple repositories
 - 📊 Role-based authorization for secure access control
-- 🧠 Clean separation of concerns using service and repository patterns
 - 🐬 MySQL database integration via Pomelo provider
 
 ---
@@ -34,7 +35,7 @@ A secure and scalable RESTful API built with ASP.NET Core and Entity Framework C
 ExpenseTrackerAPI/
 ├── Controllers/           # API controllers for Auth, Categories, and Expenses
 ├── Data/                  # EF DbContext and configurations
-├── Dtos/                  # Data Transfer Objects for Users, Categories, Expenses
+├── Dtos/                  # Data Transfer Objects with validation annotations
 │   ├── CategoriesDtos/
 │   ├── ExpensesDtos/
 │   └── UsersDtos/
@@ -43,7 +44,7 @@ ExpenseTrackerAPI/
 ├── Migrations/            # EF Core migrations
 ├── Repositories/          # Repository interfaces and implementations
 ├── Responses/             # Standardized API response models
-├── Services/              # Business logic and services
+├── Services/              # Business logic, Unit of Work, and validation rules
 ├── appsettings.json       # App configuration
 ├── Program.cs             # Application entry point
 └── README.md              # Project documentation
@@ -72,6 +73,40 @@ ExpenseTrackerAPI/
    ```
 
 5. Explore the API using Swagger at `https://localhost:{port}/swagger`.
+
+---
+
+## 🔁 Unit of Work
+
+The project uses the **Unit of Work** pattern to coordinate changes across multiple repositories (`Expenses`, `Categories`, `Users`). All data mutations are committed via a single call to:
+
+```csharp
+await _unitOfWork.CompleteAsync();
+```
+
+This ensures consistency, simplifies testing, and avoids scattered calls to `SaveChangesAsync()`.
+
+---
+
+## 🧼 Automatic Validation via DTO Annotations
+
+All input models (DTOs) include validation annotations like `[Required]`, `[StringLength]`, and `[Range]`. Combined with ASP.NET Core's `[ApiController]` attribute, invalid requests are **automatically rejected** with `400 Bad Request` responses.
+
+Example:
+```csharp
+public class ExpenseCreateDto
+{
+    [Required]
+    [StringLength(50)]
+    public string Title { get; set; }
+
+    [Range(0.01, 10000)]
+    public decimal Amount { get; set; }
+
+    [Required]
+    public int CategoryId { get; set; }
+}
+```
 
 ---
 
@@ -104,7 +139,7 @@ ExpenseTrackerAPI/
 
 ## 🧪 Testing
 
-Use [Postman](https://www.postman.com/) or Swagger UI (`/swagger`) to test endpoints.
+Use [Postman](https://www.postman.com/) or Swagger UI (`/swagger`) to test endpoints. Invalid inputs will return validation errors thanks to DTO annotations.
 
 ---
 
