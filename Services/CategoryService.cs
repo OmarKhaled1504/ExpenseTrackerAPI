@@ -8,27 +8,25 @@ namespace ExpenseTrackerAPI.Services;
 
 public class CategoryService : ICategoryService
 {
-    private readonly ICategoryRepository _categoryRepository;
-
-    private readonly IExpenseRepository _expenseRepository;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public CategoryService(ICategoryRepository categoryRepository, IExpenseRepository expenseRepository, IHttpContextAccessor httpContextAccessor)
+    public CategoryService(IUnitOfWork unitOfWork, IHttpContextAccessor httpContextAccessor)
     {
-        _categoryRepository = categoryRepository;
+        _unitOfWork = unitOfWork;
         _httpContextAccessor = httpContextAccessor;
-        _expenseRepository = expenseRepository;
     }
 
     public async Task<CategoryDto?> CreateCategoryAsync(CategoryCreateDto dto)
     {
         var newCategory = dto.ToEntity();
-        var existingCategory = await _categoryRepository.GetCategoryByNameAsync(newCategory.Name);
+        var existingCategory = await _unitOfWork.Categories.GetCategoryByNameAsync(newCategory.Name);
         if (existingCategory != null)
         {
             return null;
         }
-        var created = await _categoryRepository.CreateCategoryAsync(newCategory);
+        var created = await _unitOfWork.Categories.CreateCategoryAsync(newCategory);
+        await _unitOfWork.CompleteAsync();
         return created.ToDto();
 
     }
@@ -38,7 +36,7 @@ public class CategoryService : ICategoryService
         var userId = _httpContextAccessor.HttpContext?.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userId))
             throw new UnauthorizedAccessException("User not authenticated.");
-        var response = await _categoryRepository.GetCategoriesAsync(pageNumber, pageSize);
+        var response = await _unitOfWork.Categories.GetCategoriesAsync(pageNumber, pageSize);
 
         var result = response.Select(cat => cat.ToDto(cat.Expenses.Where(exp => exp.UserId == userId)));
 
@@ -51,7 +49,7 @@ public class CategoryService : ICategoryService
         var userId = _httpContextAccessor.HttpContext?.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userId))
             throw new UnauthorizedAccessException("User not authenticated.");
-        var response = await _categoryRepository.GetCategoryAsync(id);
+        var response = await _unitOfWork.Categories.GetCategoryAsync(id);
         if (response is null)
             return null;
         var result = response.ToDto(response.Expenses.Where(exp => exp.UserId == userId));
@@ -60,30 +58,30 @@ public class CategoryService : ICategoryService
 
     public async Task<int> GetTotalCategoriesCountAsync()
     {
-        return await _categoryRepository.GetTotalCategoriesCountAsync();
+        return await _unitOfWork.Categories.GetTotalCategoriesCountAsync();
     }
 
     public async Task<CategoryDto?> UpdateCategoryAsync(int id, CategoryUpdateDto dto)
     {
-        var existingCategory = await _categoryRepository.GetCategoryAsync(id);
-        if (existingCategory is null)
+        var category = await _unitOfWork.Categories.GetCategoryAsync(id);
+        if (category is null)
             return null;
-
-
-        var updated = await _categoryRepository.UpdateCategoryAsync(existingCategory, dto.Name);
-        return updated.ToDto();
+        category.Name = dto.Name;
+        await _unitOfWork.CompleteAsync();
+        return category.ToDto();
     }
 
     public async Task<bool> DeleteCategoryAsync(int id)
     {
-        var existingCategory = await _categoryRepository.GetCategoryAsync(id);
+        var existingCategory = await _unitOfWork.Categories.GetCategoryAsync(id);
         if (existingCategory is null)
             return false;
         if (existingCategory.Name == "Unspecified")
             throw new InvalidOperationException("Cannot delete the 'Unspecified' category.");
-        var unspecified = await _categoryRepository.GetCategoryByNameAsync("Unspecified");
-        await _expenseRepository.ReassignCategoryAsync(id, unspecified!.Id);
-        await _categoryRepository.DeleteCategoryAsync(existingCategory);
+        var unspecified = await _unitOfWork.Categories.GetCategoryByNameAsync("Unspecified");
+        await _unitOfWork.Expenses.ReassignCategoryAsync(id, unspecified!.Id);
+        _unitOfWork.Categories.DeleteCategoryAsync(existingCategory);
+        await _unitOfWork.CompleteAsync();
         return true;
     }
 }

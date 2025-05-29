@@ -19,7 +19,6 @@ public class CategoryRepository : ICategoryRepository
     public async Task<Category> CreateCategoryAsync(Category newCategory)
     {
         await _context.Categories.AddAsync(newCategory);
-        await _context.SaveChangesAsync();
         return newCategory;
     }
     public async Task<Category?> GetCategoryByNameAsync(string name)
@@ -52,15 +51,8 @@ public class CategoryRepository : ICategoryRepository
         return await _context.Categories.CountAsync();
     }
 
-    public async Task<Category> UpdateCategoryAsync(Category category, string name)
-    {
-        category.Name = name;
-        await _context.SaveChangesAsync();
-        return category;
-    }
-    public async Task DeleteCategoryAsync(Category category)
+    public void DeleteCategoryAsync(Category category)
     {
         _context.Categories.Remove(category);
-        await _context.SaveChangesAsync();
     }
 }

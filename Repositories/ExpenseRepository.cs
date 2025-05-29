@@ -17,13 +17,11 @@ public class ExpenseRepository : IExpenseRepository
     public async Task CreateExpenseAsync(Expense expense)
     {
         await _context.Expenses.AddAsync(expense);
-        await _context.SaveChangesAsync();
     }
 
-    public async Task DeleteExpenseAsync(Expense expense)
+    public void DeleteExpenseAsync(Expense expense)
     {
         _context.Expenses.Remove(expense);
-        await _context.SaveChangesAsync();
     }
 
     public async Task<Expense?> GetExpenseAsync(int id)
@@ -41,13 +39,8 @@ public class ExpenseRepository : IExpenseRepository
         {
             expense.CatId = to;
         }
-        await _context.SaveChangesAsync();
     }
 
-    public async Task UpdateExpenseAsync(Expense expense)
-    {
-        await _context.SaveChangesAsync();
-    }
     public async Task<int> GetTotalExpensesCountByIdAndFilterAsync(string userId, DateTime fromDate, DateTime toDate)
     {
         return await _context.Expenses.CountAsync(exp => exp.UserId == userId && exp.CreatedAt >= fromDate && exp.CreatedAt <= toDate);
@@ -63,4 +56,6 @@ public class ExpenseRepository : IExpenseRepository
         .OrderByDescending(exp => exp.CreatedAt)
         .ToArrayAsync();
     }
+
+
 }

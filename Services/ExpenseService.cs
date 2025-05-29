@@ -10,20 +10,18 @@ namespace ExpenseTrackerAPI.Services;
 
 public class ExpenseService : IExpenseService
 {
-    private readonly IExpenseRepository _expenseRepository;
-    private readonly ICategoryRepository _categoryRepository;
 
+    private readonly IUnitOfWork _unitOfWork;
     private readonly IHttpContextAccessor _httpContextAccessor;
-    public ExpenseService(IExpenseRepository expenseRepository, ICategoryRepository categoryRepository, IHttpContextAccessor httpContextAccessor)
+    public ExpenseService(IUnitOfWork unitOfWork, IHttpContextAccessor httpContextAccessor)
     {
-        _expenseRepository = expenseRepository;
+        _unitOfWork = unitOfWork;
         _httpContextAccessor = httpContextAccessor;
-        _categoryRepository = categoryRepository;
     }
 
     public async Task<ExpenseDto?> CreateExpenseAsync(ExpenseCreateDto dto)
     {
-        var existingCategory = await _categoryRepository.GetCategoryAsync(dto.CategoryId);
+        var existingCategory = await _unitOfWork.Categories.GetCategoryAsync(dto.CategoryId);
         if (existingCategory is null)
         {
             return null;
@@ -33,13 +31,14 @@ public class ExpenseService : IExpenseService
         expense.UserId = userId!;
         expense.CreatedAt = DateTime.UtcNow;
 
-        await _expenseRepository.CreateExpenseAsync(expense);
+        await _unitOfWork.Expenses.CreateExpenseAsync(expense);
+        await _unitOfWork.CompleteAsync();
         return expense.ToDto();
     }
 
     public async Task<bool> DeleteExpenseAsync(int id)
     {
-        var expense = await _expenseRepository.GetExpenseAsync(id);
+        var expense = await _unitOfWork.Expenses.GetExpenseAsync(id);
         if (expense is null)
         {
             return false;
@@ -48,7 +47,8 @@ public class ExpenseService : IExpenseService
         {
             throw new UnauthorizedAccessException("Forbidden.");
         }
-        await _expenseRepository.DeleteExpenseAsync(expense);
+        _unitOfWork.Expenses.DeleteExpenseAsync(expense);
+        await _unitOfWork.CompleteAsync();
         return true;
     }
 
@@ -60,7 +60,7 @@ public class ExpenseService : IExpenseService
 
     public async Task<ExpenseDto?> GetExpenseAsync(int id)
     {
-        var expense = await _expenseRepository.GetExpenseAsync(id);
+        var expense = await _unitOfWork.Expenses.GetExpenseAsync(id);
         if (expense is null)
         {
             return null;
@@ -73,10 +73,10 @@ public class ExpenseService : IExpenseService
     }
 
     public async Task<ExpenseDto?> UpdateExpenseAsync(int id, ExpenseUpdateDto dto)
-    {   var existingCategory = await _categoryRepository.GetCategoryAsync(dto.CategoryId);
+    {   var existingCategory = await _unitOfWork.Categories.GetCategoryAsync(dto.CategoryId);
         if (existingCategory is null)
             throw new Exception("Category");
-        var expense = await _expenseRepository.GetExpenseAsync(id);
+        var expense = await _unitOfWork.Expenses.GetExpenseAsync(id);
         if (expense is null)
         {
             return null;
@@ -85,7 +85,7 @@ public class ExpenseService : IExpenseService
             throw new UnauthorizedAccessException("Forbidden.");
         expense.Update(dto);
         expense.UpdatedAt = DateTime.UtcNow;
-        await _expenseRepository.UpdateExpenseAsync(expense);
+        await _unitOfWork.CompleteAsync();
         return expense.ToDto();
     }
 
@@ -126,14 +126,14 @@ public class ExpenseService : IExpenseService
             fromDate = DateTime.MinValue;
         }
 
-        var expenses = await _expenseRepository.GetExpensesAsync(userId!, fromDate, toDate, pageNumber, pageSize);
+        var expenses = await _unitOfWork.Expenses.GetExpensesAsync(userId!, fromDate, toDate, pageNumber, pageSize);
 
         return new PagedResponse<ExpenseDto>
         {
             Data = expenses.Select(exp => exp.ToDto()),
             PageNumber = pageNumber,
             PageSize = pageSize,
-            TotalCount = await _expenseRepository.GetTotalExpensesCountByIdAndFilterAsync(userId!,fromDate,toDate)
+            TotalCount = await _unitOfWork.Expenses.GetTotalExpensesCountByIdAndFilterAsync(userId!,fromDate,toDate)
         };
     }
 }

@@ -23,6 +23,7 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IExpenseRepository, ExpenseRepository>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IExpenseService, ExpenseService>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddSwaggerGen(options =>
@@ -80,13 +81,15 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
+    var context = scope.ServiceProvider.GetRequiredService<ExpenseContext>();
+    await context.Database.MigrateAsync();
+
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     await DbInitializer.SeedRolesAsync(roleManager);
 
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
     await DbInitializer.SeedAdminUserAsync(userManager);
 
-    var context = scope.ServiceProvider.GetRequiredService<ExpenseContext>();
     await DbInitializer.SeedUnspecifiedCategoryAsync(context);
 }
 

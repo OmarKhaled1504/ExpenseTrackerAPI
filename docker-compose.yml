@@ -1,0 +1,37 @@
+version: '3.9'
+
+services:
+  webapi:
+    build: .
+    container_name: dotnet-webapi
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=mysql;Database=expenseTrackerDB;User=root;Password=yourpassword;
+      - Jwt__Key=12345678900987654321abcdefghij@#
+      - Jwt__Issuer=ExpenseTrackerAPI
+      - Jwt__Audience=ExpenseTrackerAPP
+    networks:
+      - app-network
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: expenseTrackerDB
+      MYSQL_ROOT_PASSWORD: yourpassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - app-network
+
+volumes:
+  mysql_data:
+
+networks:
+  app-network:
