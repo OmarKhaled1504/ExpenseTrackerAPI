@@ -1,6 +1,8 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace ExpenseTrackerAPI.Dtos.UsersDtos;
 
 public record class LoginDto(
-    string Username,
-    string Password
+    [Required]string Username,
+    [Required]string Password
 );
